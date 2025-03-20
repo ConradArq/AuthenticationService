@@ -1,0 +1,112 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <!-- Remove files from the 'None' group so they can be explicitly included as 'Content' during the build -->
+  <ItemGroup>
+    <None Remove="Templates\Emails\EmailConfirmationEmail.cshtml" />
+    <None Remove="Templates\Emails\EmailConfirmationEmail.es.cshtml" />
+    <None Remove="Templates\Emails\PasswordResetEmail.cshtml" />
+    <None Remove="Templates\Emails\PasswordResetEmail.es.cshtml" />
+    <None Remove="Templates\Emails\TwoFactorOtpEmail.cshtml" />
+    <None Remove="Templates\Emails\TwoFactorOtpEmail.es.cshtml" />
+    <None Remove="Templates\Emails\WelcomeEmail.cshtml" />
+    <None Remove="Templates\Emails\WelcomeEmail.es.cshtml" />
+  </ItemGroup>
+
+  <!--Template's build action is set to Content. If template is not expected to change over time, it can be embedded into the assembly as a
+  resource using the EmbeddedResource build action: <EmbeddedResource Include="Templates\Reports\Notifications\NotificationsReport.cshtml" /> -->
+  <ItemGroup>
+    <Content Include="Templates\Emails\TwoFactorOtpEmail.es.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\TwoFactorOtpEmail.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\EmailConfirmationEmail.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\EmailConfirmationEmail.es.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\PasswordResetEmail.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\PasswordResetEmail.es.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\WelcomeEmail.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Templates\Emails\WelcomeEmail.es.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RazorLight" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\AuthMessages.Designer.cs">
+      <DependentUpon>AuthMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\EmailTemplateMessages.Designer.cs">
+      <DependentUpon>EmailTemplateMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\GeneralHttpStatusMessages.Designer.cs">
+      <DependentUpon>GeneralHttpStatusMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\GeneralMessages.Designer.cs">
+      <DependentUpon>GeneralMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Resources\ValidationMessages.Designer.cs">
+      <DependentUpon>ValidationMessages.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\AuthMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>AuthMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>  
+    <EmbeddedResource Update="Resources\EmailTemplateMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>EmailTemplateMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>   
+    <EmbeddedResource Update="Resources\GeneralHttpStatusMessages.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>GeneralHttpStatusMessages.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>   
+    <EmbeddedResource Update="Resources\GeneralMessages.resx">
+      <LastGenOutput>GeneralMessages.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>   
+    <EmbeddedResource Update="Resources\ValidationMessages.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ValidationMessages.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\AuthMessages.es.resx" />
+    <EmbeddedResource Update="Resources\EmailTemplateMessages.es.resx" />
+    <EmbeddedResource Update="Resources\GeneralHttpStatusMessages.es.resx" />
+    <EmbeddedResource Update="Resources\GeneralMessages.es.resx" />
+    <EmbeddedResource Update="Resources\ValidationMessages.es.resx" />
+  </ItemGroup>
+
+</Project>

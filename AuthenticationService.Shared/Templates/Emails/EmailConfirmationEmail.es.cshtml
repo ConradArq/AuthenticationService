@@ -1,0 +1,32 @@
+﻿@model AuthenticationService.Shared.Dtos.Templates.Emails.EmailConfirmationEmailDto
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Correo Electrónico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Confirmación de Correo Electrónico</h1>
+    <p>Hola @Model.FirstName,</p>
+    <p>Gracias por registrarte. Por favor, confirma tu correo electrónico haciendo clic en el botón siguiente:</p>
+    <p><a class="btn" href="https://yourdomain.com/confirm-email?email=@Model.Email&token=@Model.Token">Confirmar Correo</a></p>
+    <p>Si no solicitaste esto, puedes ignorar este mensaje.</p>
+</body>
+</html>

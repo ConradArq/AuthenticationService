@@ -1,0 +1,36 @@
+﻿@model AuthenticationService.Shared.Dtos.Templates.Emails.TwoFactorOtpEmailDto
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Código de Autenticación en Dos Pasos (2FA)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        .otp-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007BFF;
+            background-color: #f4f4f4;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Código de Autenticación en Dos Pasos (2FA)</h1>
+    <p>Hola @Model.FirstName,</p>
+    <p>Tu código de un solo uso (OTP) para la autenticación en dos pasos es:</p>
+    <p class="otp-box">@Model.Otp</p>
+    <p>Este código expirará en <strong>@Model.ExpirationMinutes</strong> minutos.</p>
+    <p>Si no solicitaste este código, ignora este correo.</p>
+</body>
+</html>

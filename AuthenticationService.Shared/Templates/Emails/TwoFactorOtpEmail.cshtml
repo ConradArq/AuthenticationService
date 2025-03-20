@@ -1,0 +1,36 @@
+﻿@model AuthenticationService.Shared.Dtos.Templates.Emails.TwoFactorOtpEmailDto
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two-Factor Authentication (2FA) Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+
+        .otp-box {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007BFF;
+            background-color: #f4f4f4;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Two-Factor Authentication (2FA) Code</h1>
+    <p>Hello @Model.FirstName,</p>
+    <p>Your One-Time Password (OTP) for two-factor authentication is:</p>
+    <p class="otp-box">@Model.Otp</p>
+    <p>This code will expire in <strong>@Model.ExpirationMinutes</strong> minutes.</p>
+    <p>If you did not request this code, please ignore this email.</p>
+</body>
+</html>
