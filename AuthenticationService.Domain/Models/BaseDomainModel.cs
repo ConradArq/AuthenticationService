@@ -1,10 +1,11 @@
 ﻿using AuthenticationService.Domain.Interfaces.Models;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace AuthenticationService.Domain.Models
 {
+    // Implentation of the IBaseDomainModel interface for models that identify themselves with an integer Id.
+    // For models that use a different type for their Id, a different implementation should be used.
     public abstract class BaseDomainModel: IBaseDomainModel
     {
         private static readonly Dictionary<string, PropertyInfo> PropertyCache = new Dictionary<string, PropertyInfo>();

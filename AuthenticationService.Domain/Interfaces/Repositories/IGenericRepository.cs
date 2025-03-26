@@ -202,6 +202,13 @@ namespace AuthenticationService.Domain.Interfaces.Repositories
         /// <returns>The updated entities.</returns>
         ICollection<T> UpdateRange(ICollection<T> entities);
 
+        /// <summary>
+        /// Reloads the specified entity from the database, refreshing its values.
+        /// Optionally, a specific property can be reloaded by providing the property expression.
+        /// </summary>
+        /// <param name="entity">The entity to reload from the database.</param>
+        /// <param name="property">Optional expression to specify a particular property to reload. If null, the entire entity is reloaded.</param>
+        /// <typeparam name="TProperty">The type of the property to reload, if specified.</typeparam>
         void Reload<TProperty>(T entity, Expression<Func<T, TProperty?>>? property = null) where TProperty : class;
     }
 }

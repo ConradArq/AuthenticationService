@@ -147,6 +147,9 @@
   <data name="NoneAvailableMessage" xml:space="preserve">
     <value>Ninguno disponible.</value>
   </data>
+  <data name="NotFoundExceptionEntitiesMessage" xml:space="preserve">
+    <value>Las entidades con los Ids ({0}) no existen.</value>
+  </data>
   <data name="NotFoundExceptionEntityMessage" xml:space="preserve">
     <value>La entidad con Id ({0}) no existe.</value>
   </data>
