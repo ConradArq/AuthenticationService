@@ -7,8 +7,5 @@ namespace AuthenticationService.Application.Features.ApplicationRole.Queries.Sea
     public class SearchPaginatedApplicationRoleQuery : PaginationRequestDto, IRequest<PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>>
     {
         public string? Name { get; set; }
-
-        [DefaultValue((int)Domain.Enums.Status.Active)]
-        public int? StatusId { get; set; }
     }
 }

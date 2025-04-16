@@ -15,7 +15,7 @@ namespace AuthenticationService.Application.Features.ApplicationMenu.Queries.Get
 
         public async Task<ResponseDto<IEnumerable<ApplicationMenuResponse>>> Handle(GetAllApplicationMenuQuery request, CancellationToken cancellationToken)
         {
-            var result = await _applicationMenuService.GetAllAsync();
+            var result = await _applicationMenuService.GetAllAsync(request);
             return result;
         }
     }

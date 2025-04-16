@@ -9,12 +9,12 @@ using AuthenticationService.Application.Features.ApplicationRole.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationRole.Queries.SearchPaginated;
 using AuthenticationService.Application.Interfaces.Services;
 using AuthenticationService.Domain.Models.Entities;
-using AuthenticationService.Shared.Helpers;
 using AuthenticationService.Shared.Resources;
 using AuthenticationService.Domain.Interfaces.Repositories;
 using AuthenticationService.Application.Features.ApplicationRole.Commands.AssignMenusToRole;
 using AuthenticationService.Application.Features.ApplicationRole.Commands.RemoveMenusFromRole;
-using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using AutoMapper.QueryableExtensions;
 
 namespace AuthenticationService.Application.Services
 {
@@ -96,10 +96,10 @@ namespace AuthenticationService.Application.Services
         public async Task<ResponseDto<ApplicationRoleMenuResponse>> AssignMenusToRoleAsync(AssignMenusToRoleCommand request)
         {
             // Check if ApplicationRole exists
-
-            var applicationRole = await _unitOfWork.ApplicationRoleRepository.GetSingleAsync(request.ApplicationRoleId, 
-                includesAndThenIncludes: new() { { x => x.ApplicationRoleMenus,
-                        new List<Expression<Func<object, object>>>{ x=>((ApplicationRoleMenu)x).ApplicationMenu } }});
+            var applicationRole = await _unitOfWork.ApplicationMenuRepository.GetSingleAsync(
+                request.ApplicationRoleId,
+                includes: x => x.Include(x => x.ApplicationRoleMenus).ThenInclude(y => y.ApplicationMenu)
+            );
 
             if (applicationRole == null)
             {
@@ -107,7 +107,6 @@ namespace AuthenticationService.Application.Services
             }
 
             // Check if all ApplicationMenuIds in the request exist
-
             var existingApplicationMenuIds = (await _unitOfWork.ApplicationMenuRepository.GetAsync(m => request.ApplicationMenuIds.Contains(m.Id))).Select(m => m.Id).ToList();
 
             var invalidApplicationMenuIds = request.ApplicationMenuIds.Except(existingApplicationMenuIds).ToList();
@@ -117,7 +116,6 @@ namespace AuthenticationService.Application.Services
             }
 
             // Save new ApplicationRoleMenus in database
-
             foreach (var applicationMenuId in request.ApplicationMenuIds)
             {
                 if (!applicationRole.ApplicationRoleMenus.Select(x => x.ApplicationMenuId).Contains(applicationMenuId))
@@ -132,16 +130,16 @@ namespace AuthenticationService.Application.Services
 
             // Response
             var applicationRoleMenuResponse = _mapper.Map<ApplicationRoleMenuResponse>(applicationRole);
-            return new ResponseDto<ApplicationRoleMenuResponse>(_mapper.Map<ApplicationRoleMenuResponse>(applicationRoleMenuResponse));          
+            return new ResponseDto<ApplicationRoleMenuResponse>(_mapper.Map<ApplicationRoleMenuResponse>(applicationRoleMenuResponse));
         }
 
         public async Task<ResponseDto<ApplicationRoleMenuResponse>> RemoveMenusFromRoleAsync(RemoveMenusFromRoleCommand request)
         {
             // Check if ApplicationRole exists
-
-            var applicationRole = await _unitOfWork.ApplicationRoleRepository.GetSingleAsync(request.ApplicationRoleId,
-                includesAndThenIncludes: new() { { x => x.ApplicationRoleMenus,
-                        new List<Expression<Func<object, object>>>{ x=>((ApplicationRoleMenu)x).ApplicationMenu } }});
+            var applicationRole = await _unitOfWork.ApplicationMenuRepository.GetSingleAsync(
+                request.ApplicationRoleId,
+                includes: x => x.Include(x => x.ApplicationRoleMenus).ThenInclude(y => y.ApplicationMenu)
+            );
 
             if (applicationRole == null)
             {
@@ -149,7 +147,6 @@ namespace AuthenticationService.Application.Services
             }
 
             // Check if all ApplicationMenuIds in the request exist
-
             var existingApplicationMenuIds = (await _unitOfWork.ApplicationMenuRepository.GetAsync(m => request.ApplicationMenuIds.Contains(m.Id))).Select(m => m.Id).ToList();
 
             var invalidApplicationMenuIds = request.ApplicationMenuIds.Except(existingApplicationMenuIds).ToList();
@@ -159,14 +156,13 @@ namespace AuthenticationService.Application.Services
             }
 
             // Remove ApplicationRoleMenus from database
-
             foreach (var applicationMenuId in request.ApplicationMenuIds)
             {
                 var applicationRoleMenu = applicationRole.ApplicationRoleMenus.FirstOrDefault(x => x.ApplicationMenuId == applicationMenuId);
-                if(applicationRoleMenu != null)
+                if (applicationRoleMenu != null)
                 {
                     applicationRole.ApplicationRoleMenus.Remove(applicationRoleMenu);
-                }          
+                }
             }
             await _unitOfWork.SaveAsync();
 
@@ -187,15 +183,24 @@ namespace AuthenticationService.Application.Services
             return new ResponseDto<ApplicationRoleResponse>(_mapper.Map<ApplicationRoleResponse>(entity));
         }
 
-        public async Task<ResponseDto<IEnumerable<ApplicationRoleResponse>>> GetAllAsync()
+        public async Task<ResponseDto<IEnumerable<ApplicationRoleResponse>>> GetAllAsync(RequestDto? requestDto)
         {
-            var entities = await _unitOfWork.ApplicationRoleRepository.GetAsync();
-            return new ResponseDto<IEnumerable<ApplicationRoleResponse>>(_mapper.Map<IEnumerable<ApplicationRoleResponse>>(entities));
+            var selector = new Func<IQueryable<ApplicationRole>, IQueryable<ApplicationRoleResponse>>(query => query
+                 .ProjectTo<ApplicationRoleResponse>(_mapper.ConfigurationProvider)
+             );
+
+            var responseDtos = await _unitOfWork.ApplicationRoleRepository.GetAsync(
+                orderBy: BuildOrderByFunction<ApplicationRole>(requestDto),
+                selector: selector
+            );
+
+            var response = new ResponseDto<IEnumerable<ApplicationRoleResponse>>(responseDtos);
+            return response;
         }
 
         public async Task<PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>> GetAllPaginatedAsync(GetAllPaginatedApplicationRoleQuery request)
         {
-            var entities = await _unitOfWork.ApplicationRoleRepository.GetPaginatedAsync(request.PageNumber, request.PageSize);
+            var entities = await _unitOfWork.ApplicationRoleRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, orderBy: BuildOrderByFunction<ApplicationRole>(request));          
             return new PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>(
                 _mapper.Map<IEnumerable<ApplicationRoleResponse>>(entities.Data),
                 request.PageNumber,
@@ -206,15 +211,15 @@ namespace AuthenticationService.Application.Services
 
         public async Task<ResponseDto<IEnumerable<ApplicationRoleResponse>>> SearchAsync(SearchApplicationRoleQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<ApplicationRole>(request);
-            var entities = await _unitOfWork.ApplicationRoleRepository.GetAsync(searchExpression);
+            var searchExpression = BuildPredicate<ApplicationRole>(request);
+            var entities = await _unitOfWork.ApplicationRoleRepository.GetAsync(searchExpression, orderBy: BuildOrderByFunction<ApplicationRole>(request));
             return new ResponseDto<IEnumerable<ApplicationRoleResponse>>(_mapper.Map<IEnumerable<ApplicationRoleResponse>>(entities));
         }
 
         public async Task<PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>> SearchPaginatedAsync(SearchPaginatedApplicationRoleQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<ApplicationRole>(request);
-            var entities = await _unitOfWork.ApplicationRoleRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, searchExpression);
+            var searchExpression = BuildPredicate<ApplicationRole>(request);
+            var entities = await _unitOfWork.ApplicationRoleRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, searchExpression, orderBy: BuildOrderByFunction<ApplicationRole>(request));
             return new PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>(
                 _mapper.Map<IEnumerable<ApplicationRoleResponse>>(entities.Data),
                 request.PageNumber,

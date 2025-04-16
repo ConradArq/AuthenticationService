@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using AuthenticationService.Shared.Resources;
+using System.ComponentModel;
+using System.Reflection;
 
 namespace AuthenticationService.API.ModelBinders
 {
@@ -15,28 +17,66 @@ namespace AuthenticationService.API.ModelBinders
         public Task BindModelAsync(ModelBindingContext bindingContext)
         {
             var query = bindingContext.HttpContext.Request.Query;
-            if (query.TryGetValue(bindingContext.FieldName, out var queryValue))
+            var modelType = bindingContext.ModelType;
+
+            // Handle simple types (int, string, bool, etc.)
+            if (TypeDescriptor.GetConverter(modelType).CanConvertFrom(typeof(string)) && !modelType.IsClass)
             {
-                var value = queryValue.FirstOrDefault();
-                if (!string.IsNullOrEmpty(value))
+                if (query.TryGetValue(bindingContext.FieldName, out var queryValue))
                 {
-                    try
+                    var value = queryValue.FirstOrDefault();
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        var converter = System.ComponentModel.TypeDescriptor.GetConverter(bindingContext.ModelType);
-                        if (converter.CanConvertFrom(typeof(string)))
+                        try
                         {
+                            var converter = TypeDescriptor.GetConverter(modelType);
                             var convertedValue = converter.ConvertFromString(value);
                             bindingContext.Result = ModelBindingResult.Success(convertedValue);
                         }
+                        catch
+                        {
+                            bindingContext.ModelState.AddModelError(bindingContext.FieldName, string.Format(ValidationMessages.InvalidQueryParameter, value, modelType.Name));
+                            bindingContext.Result = ModelBindingResult.Failed();
+                        }
                     }
-                    catch
+                }
+
+                return Task.CompletedTask;
+            }
+
+            // Handle complex types
+            var modelInstance = Activator.CreateInstance(modelType);
+
+            foreach (var prop in modelType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+            {
+                if (!prop.CanWrite)
+                    continue;
+
+                var name = prop.Name;
+
+                if (query.TryGetValue(name, out var queryValue))
+                {
+                    var value = queryValue.FirstOrDefault();
+                    if (!string.IsNullOrEmpty(value))
                     {
-                        bindingContext.ModelState.AddModelError(bindingContext.FieldName, string.Format(ValidationMessages.InvalidQueryParameter, value, bindingContext.ModelType.Name));
-                        bindingContext.Result = ModelBindingResult.Failed();
+                        try
+                        {
+                            var converter = TypeDescriptor.GetConverter(prop.PropertyType);
+                            if (converter.CanConvertFrom(typeof(string)))
+                            {
+                                var convertedValue = converter.ConvertFromString(value);
+                                prop.SetValue(modelInstance, convertedValue);
+                            }
+                        }
+                        catch
+                        {
+                            bindingContext.ModelState.AddModelError(name, string.Format(ValidationMessages.InvalidQueryParameter, value, prop.PropertyType.Name));
+                        }
                     }
                 }
             }
 
+            bindingContext.Result = ModelBindingResult.Success(modelInstance);
             return Task.CompletedTask;
         }
     }

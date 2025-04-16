@@ -16,6 +16,7 @@ using AuthenticationService.Application.Features.ApplicationRole.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationRole.Queries.SearchPaginated;
 using AuthenticationService.Shared.Resources;
 using Swashbuckle.AspNetCore.Annotations;
+using AuthenticationService.Application.Features.ApplicationMenu.Queries.GetAll;
 
 namespace AuthenticationService.API.Controllers
 {
@@ -151,10 +152,9 @@ namespace AuthenticationService.API.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<ApplicationRoleResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAll([FromQuery] GetAllApplicationRoleQuery? request)
         {
-            var request = new GetAllApplicationRoleQuery();
-            var responseDto = (ResponseDto<IEnumerable<ApplicationRoleResponse>>?)await _mediator.Send(request);
+            var responseDto = (ResponseDto<IEnumerable<ApplicationRoleResponse>>?)await _mediator.Send(request!);
             if (responseDto == null)
             {
                 throw new InvalidOperationException(GeneralMessages.MediatRErrorMessage);
@@ -167,10 +167,10 @@ namespace AuthenticationService.API.Controllers
         [HttpPost("paginated")]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiPaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetAllPaginated([FromBody] GetAllPaginatedApplicationRoleQuery request)
         {
             var responseDto = (PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>?)await _mediator.Send(request);
@@ -202,10 +202,10 @@ namespace AuthenticationService.API.Controllers
         [HttpPost("searchpaginated")]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiPaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> SearchPaginated([FromBody] SearchPaginatedApplicationRoleQuery request)
         {
             var responseDto = (PaginatedResponseDto<IEnumerable<ApplicationRoleResponse>>?)await _mediator.Send(request);

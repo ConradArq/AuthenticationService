@@ -21,13 +21,13 @@ namespace AuthenticationService.Application
             // Uncomment this line to enable localization using a folder other than the default "Resources" folder for .resx files.
             // This will configure the application to load localized strings from .resx files located in the specified folder (e.g., "FolderName").
             // Example: Place your resource files in "FolderName/ValidationMessages.en.resx" or "FolderName/ValidationMessages.es.resx".
-            //services.AddLocalization(options => options.ResourcesPath = "FolderName");
+            ////services.AddLocalization(options => options.ResourcesPath = "FolderName");
 
             // Uncomment these two lines to enable localization from the database.
             // This setup overrides the default behavior of using the "Resources" folder by replacing the default IStringLocalizerFactory.
             // All calls to IStringLocalizer or IStringLocalizer<T> will fetch strings from the database instead of .resx files.
-            //services.AddScoped<ILocalizationService, LocalizationService>();
-            //services.AddSingleton<IStringLocalizerFactory, DatabaseStringLocalizerFactory>();
+            ////services.AddScoped<ILocalizationService, LocalizationService>();
+            ////services.AddSingleton<IStringLocalizerFactory, DatabaseStringLocalizerFactory>();
 
             // To use both .resx files and database localization:
             // 1. Uncomment "services.AddLocalization" to enable .resx files.
@@ -105,20 +105,20 @@ namespace AuthenticationService.Application
                                ?? throw new InvalidOperationException("JwtSettings section is missing from configuration.");
 
             // Uncomment to dynamically choose between JWT or Cookie authentication         
-            //services.AddAuthentication(options =>
-            //{
-            //    options.DefaultAuthenticateScheme = "MultiScheme";
-            //    options.DefaultChallengeScheme = "MultiScheme";
-            //})
-            //.AddPolicyScheme("MultiScheme", "MultiScheme", options =>
-            //{
-            //    options.ForwardDefaultSelector = context =>
-            //    {
-            //        return context.Request.Headers["Authorization"].FirstOrDefault()?.StartsWith("Bearer ") == true
-            //            ? JwtBearerDefaults.AuthenticationScheme
-            //            : CookieAuthenticationDefaults.AuthenticationScheme;
-            //    };
-            //})
+            ////services.AddAuthentication(options =>
+            ////{
+            ////    options.DefaultAuthenticateScheme = "MultiScheme";
+            ////    options.DefaultChallengeScheme = "MultiScheme";
+            ////})
+            ////.AddPolicyScheme("MultiScheme", "MultiScheme", options =>
+            ////{
+            ////    options.ForwardDefaultSelector = context =>
+            ////    {
+            ////        return context.Request.Headers["Authorization"].FirstOrDefault()?.StartsWith("Bearer ") == true
+            ////            ? JwtBearerDefaults.AuthenticationScheme
+            ////            : CookieAuthenticationDefaults.AuthenticationScheme;
+            ////    };
+            ////})
 
             //Azure AD(Entra ID) uses cookies to track authentication sessions in the browser.
             services.ConfigureApplicationCookie(options =>
@@ -154,42 +154,42 @@ namespace AuthenticationService.Application
                 options.SaveTokens = true;
 
                 // Uncomment to fetch additional info from Microsoft Graph and add to claims
-                //options.Events.OnTokenValidated = async context =>
-                //{
-                //    var a = await context.HttpContext.AuthenticateAsync();
-                //    var accessToken = context.SecurityToken as JwtSecurityToken;
-                //    if (accessToken == null) return;
+                ////options.Events.OnTokenValidated = async context =>
+                ////{
+                ////    var a = await context.HttpContext.AuthenticateAsync();
+                ////    var accessToken = context.SecurityToken as JwtSecurityToken;
+                ////    if (accessToken == null) return;
 
-                //    var httpClient = new HttpClient();
-                //    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.RawData);
+                ////    var httpClient = new HttpClient();
+                ////    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken.RawData);
 
-                //    var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/me");
-                //    if (!response.IsSuccessStatusCode) return;
+                ////    var response = await httpClient.GetAsync("https://graph.microsoft.com/v1.0/me");
+                ////    if (!response.IsSuccessStatusCode) return;
 
-                //    var json = await response.Content.ReadAsStringAsync();
-                //    var userData = JsonConvert.DeserializeObject<dynamic>(json);
+                ////    var json = await response.Content.ReadAsStringAsync();
+                ////    var userData = JsonConvert.DeserializeObject<dynamic>(json);
 
-                //    var identity = (ClaimsIdentity?)context.Principal?.Identity;
-                //    if (identity != null )
-                //    {
-                //        identity.AddClaim(new Claim(ClaimTypes.GivenName, (string?)userData?.givenName ?? ""));
-                //        identity.AddClaim(new Claim(ClaimTypes.Surname, (string?)userData?.surname ?? ""));
-                //    }
-                //};
+                ////    var identity = (ClaimsIdentity?)context.Principal?.Identity;
+                ////    if (identity != null )
+                ////    {
+                ////        identity.AddClaim(new Claim(ClaimTypes.GivenName, (string?)userData?.givenName ?? ""));
+                ////        identity.AddClaim(new Claim(ClaimTypes.Surname, (string?)userData?.surname ?? ""));
+                ////    }
+                ////};
 
                 // Uncomment to request specific scopes if needed
-                //options.Scope.Add("api://2534dfed-110d-4ff3-83b1-d0a7cdff6b39/Files.Read");
-                //options.Scope.Add("https://graph.microsoft.com/.default");
-                //options.Scope.Add("openid");
-                //options.Scope.Add("profile");
-                //options.Scope.Add("email");
+                ////options.Scope.Add("api://2534dfed-110d-4ff3-83b1-d0a7cdff6b39/Files.Read");
+                ////options.Scope.Add("https://graph.microsoft.com/.default");
+                ////options.Scope.Add("openid");
+                ////options.Scope.Add("profile");
+                ////options.Scope.Add("email");
 
-                // Uncomment to fetch additional user info via Microsoft Graph API
-                //options.Scope.Add("Files.Read");
-                //options.Scope.Add("User.Read");
+                //// Uncomment to fetch additional user info via Microsoft Graph API
+                ////options.Scope.Add("Files.Read");
+                ////options.Scope.Add("User.Read");
 
                 // Uncomment to enable SSO by avoiding unnecessary login prompts
-                //options.Prompt = "none"; // Silent login if already authenticated
+                ////options.Prompt = "none"; // Silent login if already authenticated
             })
             // ASP.NET Core's authentication system automatically maps all claims from IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames
             // to Security.Claims.ClaimTypes (e.g. JwtRegisteredClaimNames.Sub to ClaimTypes.NameIdentifier).
@@ -217,14 +217,14 @@ namespace AuthenticationService.Application
                     ClockSkew = TimeSpan.Zero // Ensure immediate expiration validation
 
                     // Uncomment to allow tokens without an exp claim while validating those with exp claim (for testing purposes, not production)
-                    //LifetimeValidator = (notBefore, expires, token, parameters) =>
-                    //{
-                    //    if (!expires.HasValue)
-                    //    {
-                    //        return true;
-                    //    }
-                    //    return DateTime.UtcNow < expires.Value;
-                    //}
+                    ////LifetimeValidator = (notBefore, expires, token, parameters) =>
+                    ////{
+                    ////    if (!expires.HasValue)
+                    ////    {
+                    ////        return true;
+                    ////    }
+                    ////    return DateTime.UtcNow < expires.Value;
+                    ////}
                 };
             })
             // Cookie Authentication for Web Users
@@ -255,7 +255,7 @@ namespace AuthenticationService.Application
                     policy.Requirements.Add(new EntityOwnershipRequirement());
                     // Optionally add a specific entity type and ID parameter for customization.
                     // Use this if the entity name does not match the controller name or the ID parameter is not "id".
-                    //policy.Requirements.Add(new EntityOwnershipRequirement(entityType: typeof(ApplicationRole), idParameterName: "customId"));
+                    ////policy.Requirements.Add(new EntityOwnershipRequirement(entityType: typeof(ApplicationRole), idParameterName: "customId"));
                 });
             });
 

@@ -14,7 +14,7 @@ namespace AuthenticationService.Application.Interfaces.Services
         Task<ResponseDto<ResponseStatus>> UpdateAsync(int id, UpdateStatusCommand request);
         Task<ResponseDto<object>> DeleteAsync(int id);
         Task<ResponseDto<ResponseStatus>> GetAsync(int id);
-        Task<ResponseDto<IEnumerable<ResponseStatus>>> GetAllAsync();
+        Task<ResponseDto<IEnumerable<ResponseStatus>>> GetAllAsync(RequestDto? requestDto);
         Task<PaginatedResponseDto<IEnumerable<ResponseStatus>>> GetAllPaginatedAsync(GetAllPaginatedStatusQuery request);
         Task<ResponseDto<IEnumerable<ResponseStatus>>> SearchAsync(SearchStatusQuery request);
         Task<PaginatedResponseDto<IEnumerable<ResponseStatus>>> SearchPaginatedAsync(SearchPaginatedStatusQuery request);

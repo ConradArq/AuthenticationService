@@ -1,6 +1,11 @@
 ﻿using System.Collections;
 using System.Linq.Expressions;
+using System.Reflection;
+using System.Linq.Dynamic.Core;
 using AuthenticationService.Shared.Configurations;
+using AuthenticationService.Shared.Resources;
+using AuthenticationService.Shared.Dtos;
+using AuthenticationService.Shared.Exceptions;
 
 namespace AuthenticationService.Shared.Helpers
 {
@@ -152,5 +157,45 @@ namespace AuthenticationService.Shared.Helpers
             // Return the final predicate as an expression lambda
             return Expression.Lambda<Func<T, bool>>(predicate, parameter);
         }
+
+        /// <summary>
+        /// Builds a dynamic <c>OrderBy</c> function for LINQ queries using the sorting information provided in a <see cref="RequestDto"/>.
+        /// Returns <c>null</c> if no OrderBy field is specified.
+        /// Validates that the specified OrderBy property exists on the entity type <typeparamref name="T"/>; otherwise, a <see cref="ValidationException"/> is thrown.
+        /// This method is intended for use with API request models and performs request-level validation.
+        /// </summary>
+        /// <typeparam name="T">The entity type to apply the ordering to.</typeparam>
+        /// <param name="requestDto">The request containing the OrderBy and OrderDirection values.</param>
+        /// <returns>
+        /// A delegate that applies ordering to an <see cref="IQueryable{T}"/> based on the request, or <c>null</c> if no OrderBy is set.
+        /// </returns>
+        /// <exception cref="ValidationException">
+        /// Thrown when the specified OrderBy property does not exist on type <typeparamref name="T"/>, 
+        /// indicating an invalid client request.
+        /// </exception>
+        public static Func<IQueryable<T>, IOrderedQueryable<T>>? BuildOrderByFunction<T>(RequestDto? requestDto)
+        {
+            if (string.IsNullOrWhiteSpace(requestDto?.OrderBy))
+                return null;
+
+            var propertyName = requestDto.OrderBy.Trim();
+            var sortDirection = string.Equals(requestDto.OrderDirection, "desc", StringComparison.OrdinalIgnoreCase)
+                ? "descending"
+                : "ascending";
+
+            var prop = typeof(T).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+            if (prop == null)
+            {
+                throw new ValidationException(new Dictionary<string, string[]>
+                {
+                    { nameof(requestDto.OrderBy), new[] { string.Format(ValidationMessages.InvalidQueryParameter, requestDto.OrderBy, typeof(T).Name) } }
+                });
+            }
+
+            return x => x.OrderBy($"{propertyName} {sortDirection}");
+        }
+
+        public static Func<IQueryable<T>, IQueryable<T>>[] Includes<T>(params Func<IQueryable<T>, IQueryable<T>>[] includes)
+            where T : class => includes;
     }
 }

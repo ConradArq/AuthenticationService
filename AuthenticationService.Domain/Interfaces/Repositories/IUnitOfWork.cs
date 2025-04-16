@@ -1,4 +1,4 @@
-﻿using AuthenticationService.Domain.Models;
+﻿using AuthenticationService.Domain.Interfaces.Models;
 using AuthenticationService.Infrastructure.Persistence.Repositories;
 
 namespace AuthenticationService.Domain.Interfaces.Repositories
@@ -14,7 +14,7 @@ namespace AuthenticationService.Domain.Interfaces.Repositories
 
         Task CompleteTransactionAsync(Func<Task> functionTransaction);
         void Dispose();
-        IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseDomainModel;
+        IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class, IBaseDomainModel;
         object GetRepository(Type entityType);
         Task<int> SaveAsync();
     }

@@ -205,6 +205,15 @@ namespace AuthenticationService.Shared.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Order direction must be &apos;asc&apos; or &apos;desc&apos;..
+        /// </summary>
+        public static string InvalidOrderDirection {
+            get {
+                return ResourceManager.GetString("InvalidOrderDirection", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The password must be 8-50 characters long, include an uppercase letter, a lowercase letter, a digit, and a special character..
         /// </summary>
         public static string InvalidPasswordFormat {
@@ -255,6 +264,15 @@ namespace AuthenticationService.Shared.Resources {
         public static string ModelBindingError {
             get {
                 return ResourceManager.GetString("ModelBindingError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Order direction cannot be set without OrderBy..
+        /// </summary>
+        public static string OrderDirectionWithoutOrderByError {
+            get {
+                return ResourceManager.GetString("OrderDirectionWithoutOrderByError", resourceCulture);
             }
         }
         

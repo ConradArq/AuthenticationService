@@ -9,9 +9,9 @@ using AuthenticationService.Application.Features.ApplicationMenu.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationMenu.Queries.SearchPaginated;
 using AuthenticationService.Application.Interfaces.Services;
 using AuthenticationService.Domain.Models.Entities;
-using AuthenticationService.Shared.Helpers;
 using System.Linq.Expressions;
 using AuthenticationService.Domain.Interfaces.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace AuthenticationService.Application.Services
 {
@@ -85,19 +85,16 @@ namespace AuthenticationService.Application.Services
             return response;
         }
 
-        public async Task<ResponseDto<IEnumerable<ApplicationMenuResponse>>> GetAllAsync()
+        public async Task<ResponseDto<IEnumerable<ApplicationMenuResponse>>> GetAllAsync(RequestDto? requestDto)
         {
-            List<ApplicationMenuResponse> responseApplicationMenus = new List<ApplicationMenuResponse>();
-
             var entities = await _unitOfWork.ApplicationMenuRepository.GetAsync(
-                null,
-                new Dictionary<Expression<Func<ApplicationMenu, object>>, List<Expression<Func<object, object>>>?>
-                {
-                    { x => x.ApplicationRoleMenus, null }
-                }
+                orderBy: BuildOrderByFunction<ApplicationMenu>(requestDto),
+                includes: x => x.Include(x => x.ApplicationRoleMenus)
             );
 
             var parentMenus = entities.Where(x => x.ParentApplicationMenuId == null).OrderBy(x => x.Order).ToList();
+
+            List<ApplicationMenuResponse> responseApplicationMenus = new List<ApplicationMenuResponse>();
 
             foreach (var parentMenu in parentMenus)
             {
@@ -110,17 +107,14 @@ namespace AuthenticationService.Application.Services
 
         public async Task<PaginatedResponseDto<IEnumerable<ApplicationMenuResponse>>> GetAllPaginatedAsync(GetAllPaginatedApplicationMenuQuery request)
         {
-            List<ApplicationMenuResponse> responseApplicationMenus = new List<ApplicationMenuResponse>();
-
             var entities = await _unitOfWork.ApplicationMenuRepository.GetPaginatedAsync(
                 request.PageNumber,
                 request.PageSize,
-                null,
-                new Dictionary<Expression<Func<ApplicationMenu, object>>, List<Expression<Func<object, object>>>?>
-                {
-                    { x => x.ApplicationRoleMenus, null }
-                }
+                orderBy: BuildOrderByFunction<ApplicationMenu>(request),
+                includes: x => x.Include(x => x.ApplicationRoleMenus)
             );
+
+            List<ApplicationMenuResponse> responseApplicationMenus = new List<ApplicationMenuResponse>();
 
             var parentMenus = entities.Data.Where(x => x.ParentApplicationMenuId == null).OrderBy(x => x.Order).ToList();
 
@@ -143,14 +137,12 @@ namespace AuthenticationService.Application.Services
                 additionalCondition = x => x.ApplicationRoleMenus != null && x.ApplicationRoleMenus.Any(x => x.ApplicationRoleId == request.roleId);
             }
 
-            var searchExpression = QueryHelper.BuildPredicate(request, additionalCondition: additionalCondition);
+            var searchExpression = BuildPredicate(request, additionalCondition: additionalCondition);
 
             var entities = await _unitOfWork.ApplicationMenuRepository.GetAsync(
                 searchExpression,
-                new Dictionary<Expression<Func<ApplicationMenu, object>>, List<Expression<Func<object, object>>>?>
-                {
-                    { x => x.ApplicationRoleMenus, null }
-                }
+                orderBy: BuildOrderByFunction<ApplicationMenu>(request),
+                includes: x => x.Include(x => x.ApplicationRoleMenus)
             );
 
             var parentMenus = entities.Where(x => x.ParentApplicationMenuId == null).OrderBy(x => x.Order).ToList();
@@ -174,16 +166,14 @@ namespace AuthenticationService.Application.Services
                 additionalCondition = x => x.ApplicationRoleMenus != null && x.ApplicationRoleMenus.Any(x => x.ApplicationRoleId == request.roleId);
             }
 
-            var searchExpression = QueryHelper.BuildPredicate(request, additionalCondition: additionalCondition);
+            var searchExpression = BuildPredicate(request, additionalCondition: additionalCondition);
 
             var entities = await _unitOfWork.ApplicationMenuRepository.GetPaginatedAsync(
                 request.PageNumber,
                 request.PageSize,
                 searchExpression,
-                new Dictionary<Expression<Func<ApplicationMenu, object>>, List<Expression<Func<object, object>>>?>
-                {
-                    { x => x.ApplicationRoleMenus, null }
-                }
+                orderBy: BuildOrderByFunction<ApplicationMenu>(request),
+                includes: x => x.Include(x => x.ApplicationRoleMenus)
             );
 
             var parentMenus = entities.Data.Where(x => x.ParentApplicationMenuId == null).OrderBy(x => x.Order).ToList();

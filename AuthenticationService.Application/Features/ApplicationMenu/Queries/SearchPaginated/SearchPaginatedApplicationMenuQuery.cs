@@ -18,9 +18,6 @@ namespace AuthenticationService.Application.Features.ApplicationMenu.Queries.Sea
 
         public int? ParentApplicationMenuId { get; set; }
 
-        [DefaultValue((int)Domain.Enums.Status.Active)]
-        public int? StatusId { get; set; }
-
         public string? roleId { get; set; }
     }
 }

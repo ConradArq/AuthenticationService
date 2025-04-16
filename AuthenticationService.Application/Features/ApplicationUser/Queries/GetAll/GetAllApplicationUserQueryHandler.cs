@@ -15,7 +15,7 @@ namespace AuthenticationService.Application.Features.ApplicationUser.Queries.Get
 
         public async Task<ResponseDto<IEnumerable<ApplicationUserResponse>>> Handle(GetAllApplicationUserQuery request, CancellationToken cancellationToken)
         {
-            var result = await _applicationUserService.GetAllAsync();
+            var result = await _applicationUserService.GetAllAsync(request);
             return result;
         }
     }

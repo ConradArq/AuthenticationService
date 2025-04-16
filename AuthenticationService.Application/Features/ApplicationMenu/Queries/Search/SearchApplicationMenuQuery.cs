@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace AuthenticationService.Application.Features.ApplicationMenu.Queries.Search
 {
-    public class SearchApplicationMenuQuery : IRequest<ResponseDto<IEnumerable<ApplicationMenuResponse>>>
+    public class SearchApplicationMenuQuery : RequestDto, IRequest<ResponseDto<IEnumerable<ApplicationMenuResponse>>>
     {
         public string? Title { get; set; } = string.Empty;
         public string? Path { get; set; }
@@ -17,9 +17,6 @@ namespace AuthenticationService.Application.Features.ApplicationMenu.Queries.Sea
         public int? Order { get; set; }
 
         public int? ParentApplicationMenuId { get; set; }
-
-        [DefaultValue((int)Domain.Enums.Status.Active)]
-        public int? StatusId { get; set; }
 
         public string? roleId { get; set; }
     }

@@ -15,7 +15,7 @@ namespace AuthenticationService.Application.Features.ApplicationUser.Commands.De
 
         public async Task<ResponseDto<object>> Handle(DeleteApplicationUserCommand request, CancellationToken cancellationToken)
         {
-            var result = await _applicationUserService.DeleteAsync(request.Id);
+            var result = await _applicationUserService.DeleteAsync(request);
             return result;
         }
     }

@@ -8,9 +8,11 @@ using AuthenticationService.Application.Features.ApplicationUser.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationUser.Queries.SearchPaginated;
 using AuthenticationService.Application.Interfaces.Services;
 using AuthenticationService.Domain.Models.Entities;
-using AuthenticationService.Shared.Helpers;
 using AuthenticationService.Shared.Resources;
 using AuthenticationService.Domain.Interfaces.Repositories;
+using AutoMapper.QueryableExtensions;
+using AuthenticationService.Application.Features.ApplicationUser.Commands.Delete;
+using AuthenticationService.Application.Strategies;
 
 namespace AuthenticationService.Application.Services
 {
@@ -101,47 +103,79 @@ namespace AuthenticationService.Application.Services
             return new ResponseDto<ApplicationUserResponse>(applicationUserResponse);
         }
 
-        public async Task<ResponseDto<object>> DeleteAsync(string id)
+        public async Task<ResponseDto<object>> DeleteAsync(DeleteApplicationUserCommand request)
         {
             var userRepository = _unitOfWork.ApplicationUserRepository;
-            var entity = await userRepository.GetByIdAsync(id);
+            var entity = await userRepository.GetByIdAsync(request.Id);
             if (entity == null)
             {
-                throw new NotFoundException(id);
+                throw new NotFoundException(request.Id);
             }
 
-            var (isSuccess, errors) = await userRepository.DeleteUserAsync(entity);
-            if (!isSuccess)
+            if (request.SoftDelete)
             {
-                throw new Exception(string.Join(" ", errors));
+                var softDeleteStrategy = SoftDeleteStrategy<ApplicationUser>.Instance;
+                softDeleteStrategy.Delete(entity, _unitOfWork);
+                await _unitOfWork.SaveAsync();
+            }
+            else
+            {
+                var (isSuccess, errors) = await userRepository.DeleteUserAsync(entity);
+                if (!isSuccess)
+                {
+                    throw new Exception(string.Join(" ", errors));
+                }
             }
 
-            await _unitOfWork.SaveAsync();
             return new ResponseDto<object>();
         }
 
         public async Task<ResponseDto<ApplicationUserResponse>> GetAsync(string id)
         {
-            var entity = await _unitOfWork.ApplicationUserRepository.GetByIdAsync(id);
+            var selector = new Func<IQueryable<ApplicationUser>, IQueryable<ApplicationUserResponse>>(query =>
+                query.ProjectTo<ApplicationUserResponse>(_mapper.ConfigurationProvider)
+            );
+
+            var entity = await _unitOfWork.ApplicationUserRepository.GetSingleAsync(id, selector: selector);
+
             if (entity == null)
             {
                 throw new NotFoundException(id);
             }
 
-            return new ResponseDto<ApplicationUserResponse>(_mapper.Map<ApplicationUserResponse>(entity));
+            return new ResponseDto<ApplicationUserResponse>(entity);
         }
 
-        public async Task<ResponseDto<IEnumerable<ApplicationUserResponse>>> GetAllAsync()
+        public async Task<ResponseDto<IEnumerable<ApplicationUserResponse>>> GetAllAsync(RequestDto? requestDto)
         {
-            var entities = await _unitOfWork.ApplicationUserRepository.GetAsync();
-            return new ResponseDto<IEnumerable<ApplicationUserResponse>>(_mapper.Map<IEnumerable<ApplicationUserResponse>>(entities));
+            var selector = new Func<IQueryable<ApplicationUser>, IQueryable<ApplicationUserResponse>>(query => query
+                 .ProjectTo<ApplicationUserResponse>(_mapper.ConfigurationProvider)
+             );
+
+            var responseDtos = await _unitOfWork.ApplicationUserRepository.GetAsync(
+                orderBy: BuildOrderByFunction<ApplicationUser>(requestDto),
+                selector: selector
+            );
+
+            var response = new ResponseDto<IEnumerable<ApplicationUserResponse>>(responseDtos);
+            return response;
         }
 
         public async Task<PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>> GetAllPaginatedAsync(GetAllPaginatedApplicationUserQuery request)
         {
-            var entities = await _unitOfWork.ApplicationUserRepository.GetPaginatedAsync(request.PageNumber, request.PageSize);
+            var selector = new Func<IQueryable<ApplicationUser>, IQueryable<ApplicationUserResponse>>(query => query
+                .ProjectTo<ApplicationUserResponse>(_mapper.ConfigurationProvider)
+            );
+
+            var entities = await _unitOfWork.ApplicationUserRepository.GetPaginatedAsync(
+                request.PageNumber,
+                request.PageSize,
+                orderBy: BuildOrderByFunction<ApplicationUser>(request),
+                selector: selector
+            );
+
             return new PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>(
-                _mapper.Map<IEnumerable<ApplicationUserResponse>>(entities.Data),
+                entities.Data,
                 request.PageNumber,
                 request.PageSize,
                 entities.TotalItems
@@ -150,17 +184,39 @@ namespace AuthenticationService.Application.Services
 
         public async Task<ResponseDto<IEnumerable<ApplicationUserResponse>>> SearchAsync(SearchApplicationUserQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<ApplicationUser>(request);
-            var entities = await _unitOfWork.ApplicationUserRepository.GetAsync(searchExpression);
-            return new ResponseDto<IEnumerable<ApplicationUserResponse>>(_mapper.Map<IEnumerable<ApplicationUserResponse>>(entities));
+            var selector = new Func<IQueryable<ApplicationUser>, IQueryable<ApplicationUserResponse>>(query => query
+                .ProjectTo<ApplicationUserResponse>(_mapper.ConfigurationProvider)
+            );
+
+            var searchExpression = BuildPredicate<ApplicationUser>(request);
+
+            var entities = await _unitOfWork.ApplicationUserRepository.GetAsync(
+                predicate: searchExpression,
+                orderBy: BuildOrderByFunction<ApplicationUser>(request),
+                selector: selector
+            );
+
+            return new ResponseDto<IEnumerable<ApplicationUserResponse>>(entities);
         }
 
         public async Task<PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>> SearchPaginatedAsync(SearchPaginatedApplicationUserQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<ApplicationUser>(request);
-            var entities = await _unitOfWork.ApplicationUserRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, searchExpression);
+            var selector = new Func<IQueryable<ApplicationUser>, IQueryable<ApplicationUserResponse>>(query => query
+                .ProjectTo<ApplicationUserResponse>(_mapper.ConfigurationProvider)
+            );
+
+            var searchExpression = BuildPredicate<ApplicationUser>(request);
+
+            var entities = await _unitOfWork.ApplicationUserRepository.GetPaginatedAsync(
+                pageNumber: request.PageNumber,
+                pageSize: request.PageSize,
+                predicate: searchExpression,
+                orderBy: BuildOrderByFunction<ApplicationUser>(request),
+                selector: selector
+            );
+
             return new PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>(
-                _mapper.Map<IEnumerable<ApplicationUserResponse>>(entities.Data),
+                entities.Data,
                 request.PageNumber,
                 request.PageSize,
                 entities.TotalItems

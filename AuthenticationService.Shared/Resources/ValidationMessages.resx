@@ -186,4 +186,10 @@
   <data name="ListItemsMustBeGreaterThanZeroError" xml:space="preserve">
     <value>Each item in the list must be greater than zero.</value>
   </data>
+  <data name="InvalidOrderDirection" xml:space="preserve">
+    <value>Order direction must be 'asc' or 'desc'.</value>
+  </data>
+  <data name="OrderDirectionWithoutOrderByError" xml:space="preserve">
+    <value>Order direction cannot be set without OrderBy.</value>
+  </data>
 </root>

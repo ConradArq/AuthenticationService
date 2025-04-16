@@ -1,6 +1,5 @@
 ﻿using AuthenticationService.Domain.Interfaces.Models;
 using AuthenticationService.Domain.Interfaces.Repositories;
-using AuthenticationService.Domain.Models;
 
 namespace AuthenticationService.Infrastructure.Persistence.Repositories
 {
@@ -69,7 +68,7 @@ namespace AuthenticationService.Infrastructure.Persistence.Repositories
         /// Provides a generic repository instance for the specified TEntity type which simplifies access to basic CRUD operations 
         /// for any entity type, allowing developers to manage multiple entities without writing repetitive code for each repository.
         /// </summary>
-        public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseDomainModel
+        public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class, IBaseDomainModel
         {
             var type = typeof(TEntity).Name;
 

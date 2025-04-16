@@ -11,8 +11,5 @@ namespace AuthenticationService.Application.Features.ApplicationUser.Queries.Sea
         public string? Email { get; set; }
         public string? UserName { get; set; }
         public List<string>? RoleNames { get; set; }
-
-        [DefaultValue((int)Domain.Enums.Status.Active)]
-        public int? StatusId { get; set; }
     }
 }

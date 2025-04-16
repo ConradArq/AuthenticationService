@@ -29,7 +29,7 @@ namespace AuthenticationService.Infrastructure
             {
                 options.UseSqlServer(configuration.GetConnectionString("ConnectionString"));
                 options.EnableSensitiveDataLogging();
-                //*,sqlServerOptions => sqlServerOptions.CommandTimeout(60)*/)
+                ////*,sqlServerOptions => sqlServerOptions.CommandTimeout(60)*/)
             });
 
             services.AddIdentity<ApplicationUser, ApplicationRole>(options =>

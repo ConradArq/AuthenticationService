@@ -12,6 +12,7 @@ using AuthenticationService.Application.Features.ApplicationUser.Queries.GetAllP
 using AuthenticationService.Application.Features.ApplicationUser.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationUser.Queries.SearchPaginated;
 using AuthenticationService.Shared.Resources;
+using AuthenticationService.Application.Features.ApplicationMenu.Queries.GetAll;
 
 namespace AuthenticationService.API.Controllers
 {
@@ -54,9 +55,9 @@ namespace AuthenticationService.API.Controllers
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete([FromRoute] string id)
+        public async Task<ActionResult> Delete([FromRoute] string id, [FromQuery] bool softDelete = false)
         {
-            var request = new DeleteApplicationUserCommand() {  Id = id };
+            var request = new DeleteApplicationUserCommand() {  Id = id, SoftDelete = softDelete };
             var responseDto = (ResponseDto<object>?)await _mediator.Send(request);
             if (responseDto == null)
             {
@@ -88,10 +89,9 @@ namespace AuthenticationService.API.Controllers
         [HttpGet]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiResponseDto<IEnumerable<ApplicationUserResponse>>), StatusCodes.Status200OK)]
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAll([FromQuery] GetAllApplicationUserQuery? request)
         {
-            var request = new GetAllApplicationUserQuery();
-            var responseDto = (ResponseDto<IEnumerable<ApplicationUserResponse>>?)await _mediator.Send(request);
+            var responseDto = (ResponseDto<IEnumerable<ApplicationUserResponse>>?)await _mediator.Send(request!);
             if (responseDto == null)
             {
                 throw new InvalidOperationException(GeneralMessages.MediatRErrorMessage);
@@ -104,10 +104,10 @@ namespace AuthenticationService.API.Controllers
         [HttpPost("paginated")]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiPaginatedResponseDto<IEnumerable<ApplicationUserResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> GetAllPaginated([FromBody] GetAllPaginatedApplicationUserQuery request)
         {
             var responseDto = (PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>?)await _mediator.Send(request);
@@ -139,10 +139,10 @@ namespace AuthenticationService.API.Controllers
         [HttpPost("searchpaginated")]
         [Authorize(Roles = "Admin, Manager")]
         [ProducesResponseType(typeof(ApiPaginatedResponseDto<IEnumerable<ApplicationUserResponse>>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status401Unauthorized)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(typeof(ApiPaginatedResponseDto<object>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult> SearchPaginated([FromBody] SearchPaginatedApplicationUserQuery request)
         {
             var responseDto = (PaginatedResponseDto<IEnumerable<ApplicationUserResponse>>?)await _mediator.Send(request);

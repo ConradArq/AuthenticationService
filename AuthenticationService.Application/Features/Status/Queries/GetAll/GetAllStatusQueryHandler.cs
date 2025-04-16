@@ -15,7 +15,7 @@ namespace AuthenticationService.Application.Features.Status.Queries.GetAll
 
         public async Task<ResponseDto<IEnumerable<ResponseStatus>>> Handle(GetAllStatusQuery request, CancellationToken cancellationToken)
         {
-            var result = await _statusService.GetAllAsync();
+            var result = await _statusService.GetAllAsync(request);
             return result;
         }
     }

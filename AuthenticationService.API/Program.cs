@@ -85,8 +85,8 @@ builder.Services.AddSwaggerGen(c =>
     });
 
     // Uncomment to include XML documentation comments from the project's generated .xml file in Swagger.
-    //var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    //c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    ////var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    ////c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
 
 // Configure HostOptions to handle unhandled exceptions in BackgroundService

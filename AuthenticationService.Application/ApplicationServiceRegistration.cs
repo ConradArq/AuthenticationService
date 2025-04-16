@@ -30,7 +30,7 @@ namespace AuthenticationService.Application
             // Uncomment to enable integration between FluentValidation and ASP.NET Core's automatic model validation. Not needed because
             // validation is handled manually in ValidationBehavior. If enabled, to keep validation handling in the MediatR pipeline
             // via behaviors, set ApiBehaviorOptions.SuppressModelStateInvalidFilter to true to disable automatic 400 Bad Request responses.
-            // services.AddFluentValidationAutoValidation();
+            //// services.AddFluentValidationAutoValidation();
 
             services.AddMediatR(config => config.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
             // UnhandledExceptionBehaviour is registered early in the pipeline to catch all unhandled exceptions.

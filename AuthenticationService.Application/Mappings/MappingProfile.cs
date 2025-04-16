@@ -56,7 +56,8 @@ namespace AuthenticationService.Application.Mappings
             // ApplicationUser
             CreateMap<UpdateApplicationUserCommand, ApplicationUser?>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<ApplicationUser, ApplicationUserResponse>();
+            CreateMap<ApplicationUser, ApplicationUserResponse>()
+                .ForMember(dest => dest.RoleNames, opt => opt.MapFrom(src => src.ApplicationUserRoles.Select(x => x.ApplicationRole.Name)));
             // Used in the identity workflow
             CreateMap<ApplicationUserResponseDto, ApplicationUserResponse>();
             CreateMap<ResponseDto<ApplicationUserResponseDto>, ResponseDto<ApplicationUserResponse>>();

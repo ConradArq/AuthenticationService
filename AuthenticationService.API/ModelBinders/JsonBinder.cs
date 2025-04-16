@@ -19,7 +19,9 @@ namespace AuthenticationService.API.ModelBinders
         public async Task BindModelAsync(ModelBindingContext bindingContext)
         {
             var httpContext = bindingContext.HttpContext;
-            if (httpContext.Request.ContentType == "application/json")
+            string? contentType = httpContext.Request.ContentType;
+
+            if (!string.IsNullOrEmpty(contentType) && contentType.StartsWith("application/json", StringComparison.OrdinalIgnoreCase))
             {
                 // The httpContext.Request.Body is a non-seekable HttpRequestStream. Once read, it cannot be read again without buffering.
                 // To allow multiple reads of the body (e.g., in action filters, model binders, and attributes), we enable buffering 

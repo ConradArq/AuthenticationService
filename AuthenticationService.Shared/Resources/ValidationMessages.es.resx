@@ -186,4 +186,10 @@
   <data name="ListItemsMustBeGreaterThanZeroError" xml:space="preserve">
     <value>Cada elemento de la lista debe ser mayor que cero.</value>
   </data>
+  <data name="InvalidOrderDirection" xml:space="preserve">
+    <value>La dirección de orden debe ser 'asc' o 'desc'.</value>
+  </data>
+  <data name="OrderDirectionWithoutOrderByError" xml:space="preserve">
+    <value>No se puede establecer la dirección de orden sin OrderBy.</value>
+  </data>
 </root>

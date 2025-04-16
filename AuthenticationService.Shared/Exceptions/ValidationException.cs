@@ -14,9 +14,25 @@ namespace AuthenticationService.Shared.Exceptions
             Errors = new Dictionary<string, string[]>();
         }
 
+        public ValidationException(string errorMessage) : this()
+        {
+            Errors = new Dictionary<string, string[]>
+            {
+                { "General", new[] { errorMessage } }
+            };
+        }
+
         public ValidationException(Dictionary<string, string[]> errors) : this()
         {
-            Errors = errors;              
+            Errors = errors;
+        }
+
+        public ValidationException(string key, string[] errors) : this()
+        {
+            Errors = new Dictionary<string, string[]>
+            {
+                { key, errors }
+            };
         }
 
         public IDictionary<string, string[]> Errors { get; }

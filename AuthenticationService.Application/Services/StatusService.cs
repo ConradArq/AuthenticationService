@@ -9,8 +9,9 @@ using AuthenticationService.Application.Features.Status.Queries.Search;
 using AuthenticationService.Application.Features.Status.Queries.SearchPaginated;
 using AuthenticationService.Application.Interfaces.Services;
 using AuthenticationService.Domain.Models.Entities;
-using AuthenticationService.Shared.Helpers;
 using AuthenticationService.Domain.Interfaces.Repositories;
+using AuthenticationService.Shared.Helpers;
+using AutoMapper.QueryableExtensions;
 
 namespace AuthenticationService.Application.Services
 {
@@ -81,17 +82,24 @@ namespace AuthenticationService.Application.Services
             return response;
         }
 
-        public async Task<ResponseDto<IEnumerable<ResponseStatus>>> GetAllAsync()
+        public async Task<ResponseDto<IEnumerable<ResponseStatus>>> GetAllAsync(RequestDto? requestDto)
         {
-            var entities = await _unitOfWork.StatusRepository.GetAsync();
+            var selector = new Func<IQueryable<Status>, IQueryable<ResponseStatus>>(query => query
+                 .ProjectTo<ResponseStatus>(_mapper.ConfigurationProvider)
+             );
 
-            var response = new ResponseDto<IEnumerable<ResponseStatus>>(_mapper.Map<IEnumerable<ResponseStatus>>(entities));
+            var responseDtos = await _unitOfWork.StatusRepository.GetAsync(
+                orderBy: QueryHelper.BuildOrderByFunction<Status>(requestDto),
+                selector: selector
+            );
+
+            var response = new ResponseDto<IEnumerable<ResponseStatus>>(responseDtos);
             return response;
         }
 
         public async Task<PaginatedResponseDto<IEnumerable<ResponseStatus>>> GetAllPaginatedAsync(GetAllPaginatedStatusQuery request)
         {
-            var entities = await _unitOfWork.StatusRepository.GetPaginatedAsync(request.PageNumber, request.PageSize);
+            var entities = await _unitOfWork.StatusRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, orderBy: BuildOrderByFunction<Status>(request));
 
             var response = new PaginatedResponseDto<IEnumerable<ResponseStatus>>(_mapper.Map<IEnumerable<ResponseStatus>>(entities.Data), request.PageNumber, request.PageSize, entities.TotalItems);
             return response;
@@ -99,8 +107,8 @@ namespace AuthenticationService.Application.Services
 
         public async Task<ResponseDto<IEnumerable<ResponseStatus>>> SearchAsync(SearchStatusQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<Status>(request);
-            var entities = await _unitOfWork.StatusRepository.GetAsync(searchExpression);
+            var searchExpression = BuildPredicate<Status>(request);
+            var entities = await _unitOfWork.StatusRepository.GetAsync(searchExpression, orderBy: BuildOrderByFunction<Status>(request));
 
             var response = new ResponseDto<IEnumerable<ResponseStatus>>(_mapper.Map<IEnumerable<ResponseStatus>>(entities));
             return response;
@@ -108,8 +116,8 @@ namespace AuthenticationService.Application.Services
 
         public async Task<PaginatedResponseDto<IEnumerable<ResponseStatus>>> SearchPaginatedAsync(SearchPaginatedStatusQuery request)
         {
-            var searchExpression = QueryHelper.BuildPredicate<Status>(request);
-            var entities = await _unitOfWork.StatusRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, searchExpression);
+            var searchExpression = BuildPredicate<Status>(request);
+            var entities = await _unitOfWork.StatusRepository.GetPaginatedAsync(request.PageNumber, request.PageSize, searchExpression, orderBy: BuildOrderByFunction<Status>(request));
 
             var response = new PaginatedResponseDto<IEnumerable<ResponseStatus>>(_mapper.Map<IEnumerable<ResponseStatus>>(entities.Data), request.PageNumber, request.PageSize, entities.TotalItems);
             return response;

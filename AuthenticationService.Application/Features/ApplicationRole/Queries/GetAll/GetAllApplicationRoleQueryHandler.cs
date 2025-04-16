@@ -15,7 +15,7 @@ namespace AuthenticationService.Application.Features.ApplicationRole.Queries.Get
 
         public async Task<ResponseDto<IEnumerable<ApplicationRoleResponse>>> Handle(GetAllApplicationRoleQuery request, CancellationToken cancellationToken)
         {
-            var result = await _applicationRoleService.GetAllAsync();
+            var result = await _applicationRoleService.GetAllAsync(request);
             return result;
         }
     }
