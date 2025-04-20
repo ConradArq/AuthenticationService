@@ -1,7 +1,9 @@
 ﻿using MediatR;
 using AuthenticationService.Shared.Dtos;
 using System.ComponentModel;
-using System.Text.Json.Serialization;
+using AuthenticationService.Application.Strategies.Delete.Enums;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace AuthenticationService.Application.Features.ApplicationUser.Commands.Delete
 {
@@ -14,13 +16,16 @@ namespace AuthenticationService.Application.Features.ApplicationUser.Commands.De
         /// <summary>
         /// The ID of the user to delete. This value is bound from the route.
         /// </summary>
-        [JsonIgnore]
+        [BindNever]
         public string Id { get; set; } = string.Empty;
 
         /// <summary>
-        /// Indicates whether the user should be soft-deleted.
-        /// Defaults to false (i.e., perform a hard delete).
+        /// Specifies the deletion mode for the user.
+        /// Defaults to <see cref="DeletionMode.Hard"/> (i.e., a permanent deletion).
+        /// Use <see cref="DeletionMode.Soft"/> to mark the user as deleted without removing data.
         /// </summary>
-        public bool SoftDelete { get; set; } = false;
+        [FromQuery]
+        [DefaultValue(DeletionMode.Hard)]
+        public DeletionMode DeletionMode { get; set; } = DeletionMode.Hard;
     }
 }

@@ -12,7 +12,8 @@ using AuthenticationService.Shared.Resources;
 using AuthenticationService.Domain.Interfaces.Repositories;
 using AutoMapper.QueryableExtensions;
 using AuthenticationService.Application.Features.ApplicationUser.Commands.Delete;
-using AuthenticationService.Application.Strategies;
+using AuthenticationService.Application.Strategies.Delete;
+using AuthenticationService.Application.Interfaces.Strategies.Delete.Factories;
 
 namespace AuthenticationService.Application.Services
 {
@@ -20,11 +21,13 @@ namespace AuthenticationService.Application.Services
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDeleteStrategyFactory _deleteStrategyFactory;
 
-        public ApplicationUserService(IMapper mapper, IUnitOfWork unitOfWork)
+        public ApplicationUserService(IMapper mapper, IUnitOfWork unitOfWork, IDeleteStrategyFactory deleteStrategyFactory)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _deleteStrategyFactory = deleteStrategyFactory;
         }
 
         public async Task<ResponseDto<ApplicationUserResponse>> UpdateAsync(string id, UpdateApplicationUserCommand request)
@@ -112,20 +115,9 @@ namespace AuthenticationService.Application.Services
                 throw new NotFoundException(request.Id);
             }
 
-            if (request.SoftDelete)
-            {
-                var softDeleteStrategy = SoftDeleteStrategy<ApplicationUser>.Instance;
-                softDeleteStrategy.Delete(entity, _unitOfWork);
-                await _unitOfWork.SaveAsync();
-            }
-            else
-            {
-                var (isSuccess, errors) = await userRepository.DeleteUserAsync(entity);
-                if (!isSuccess)
-                {
-                    throw new Exception(string.Join(" ", errors));
-                }
-            }
+            var deleteStrategy = _deleteStrategyFactory.Create<ApplicationUser>(request.DeletionMode);
+            deleteStrategy.Delete(entity, _unitOfWork);
+            await _unitOfWork.SaveAsync();
 
             return new ResponseDto<object>();
         }

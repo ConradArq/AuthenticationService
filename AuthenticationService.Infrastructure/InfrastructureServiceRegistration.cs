@@ -18,6 +18,7 @@ using AuthenticationService.Infrastructure.Factories;
 using AuthenticationService.Infrastructure.Services.UserEmails;
 using AuthenticationService.Shared.Interfaces.Providers;
 using AuthenticationService.Shared.Interfaces.Factories;
+using Microsoft.Extensions.Hosting;
 
 namespace AuthenticationService.Infrastructure
 {
@@ -71,12 +72,18 @@ namespace AuthenticationService.Infrastructure
             services.AddScoped<IUserEmailService<TwoFactorOtpEmailDto>, TwoFactorOtpUserEmailService>();
 
             services.AddSingleton<IEmailQueueService, EmailQueueService>();
-            services.AddTransient<IEmailService, EmailService>();
+            services.AddSingleton<IEmailService, EmailService>();
             services.AddSingleton<IHttpService, HttpService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 
             services.AddHostedService<EmailBackgroundService>();
+
+            // Prevent unhandled exceptions in BackgroundService from stopping the host
+            services.Configure<HostOptions>(options =>
+            {
+                options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
+            });
 
             return services;
         }

@@ -5,13 +5,12 @@ using AuthenticationService.Infrastructure.Services.Queues;
 using AuthenticationService.Infrastructure.Logging;
 using AuthenticationService.Infrastructure.Services.BackgroundServices;
 using AuthenticationService.Infrastructure.Interfaces.Logging;
-using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using AuthenticationService.Infrastructure.Interfaces.Services;
-using Microsoft.AspNetCore.Localization;
 using AuthenticationService.Shared.Interfaces.Providers;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,80 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAPIServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
-builder.Services.AddCors(options =>
-{
-    // Browsers block AllowAnyOrigin() when credentials like Authorization headers are sent, so origins in the CORS policy are used instead.
-    options.AddPolicy("ClientApp", builder =>
-    {
-
-#if DEBUG
-        builder.WithOrigins("http://localhost:5170")
-               .AllowCredentials()
-               .AllowAnyHeader()
-               .AllowAnyMethod();
-#else
-        builder.WithOrigins("https://client-app-url.com")
-               .AllowCredentials()
-               .AllowAnyHeader()
-               .AllowAnyMethod();
-#endif
-
-    });
-
-});
-
-builder.Services.AddSwaggerGen(c =>
-{
-    c.EnableAnnotations();
-
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-
-        Title = "AuthenticationService",
-        Version = "v1",
-        Description = "A template project designed for efficiently and consistently building new applications using the CQRS pattern with MediatR for request handling and separation of concerns.",
-        Contact = new OpenApiContact()
-        {
-            Name = "Development by: conra.arq@gmail.com"
-        }
-    });
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Please insert the JWT token in this format: Bearer {your token here}"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-
-    // Uncomment to include XML documentation comments from the project's generated .xml file in Swagger.
-    ////var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    ////c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-});
-
-// Configure HostOptions to handle unhandled exceptions in BackgroundService
-builder.Services.Configure<HostOptions>(options =>
-{
-    options.BackgroundServiceExceptionBehavior = BackgroundServiceExceptionBehavior.Ignore;
-});
 
 #region Logging
 
@@ -218,8 +143,17 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
+    var apiVersionProvider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        foreach (var description in apiVersionProvider.ApiVersionDescriptions)
+        {
+            options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                $"API {description.GroupName.ToUpperInvariant()}");
+        }
+    });
 
     // Middleware to inject a JWT token into requests for testing endpoints requiring authorization (for development only)
     app.Use(async (context, next) =>

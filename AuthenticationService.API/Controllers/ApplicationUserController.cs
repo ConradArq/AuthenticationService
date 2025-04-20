@@ -12,14 +12,15 @@ using AuthenticationService.Application.Features.ApplicationUser.Queries.GetAllP
 using AuthenticationService.Application.Features.ApplicationUser.Queries.Search;
 using AuthenticationService.Application.Features.ApplicationUser.Queries.SearchPaginated;
 using AuthenticationService.Shared.Resources;
-using AuthenticationService.Application.Features.ApplicationMenu.Queries.GetAll;
+using AuthenticationService.Application.Strategies.Delete.Enums;
 
 namespace AuthenticationService.API.Controllers
 {
     // Only authentication is required; no specific authorization policies or roles are applied.
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status500InternalServerError)]
@@ -55,9 +56,9 @@ namespace AuthenticationService.API.Controllers
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> Delete([FromRoute] string id, [FromQuery] bool softDelete = false)
+        public async Task<ActionResult> Delete([FromRoute] string id, [FromQuery] DeleteApplicationUserCommand request)
         {
-            var request = new DeleteApplicationUserCommand() {  Id = id, SoftDelete = softDelete };
+            request.Id = id;
             var responseDto = (ResponseDto<object>?)await _mediator.Send(request);
             if (responseDto == null)
             {

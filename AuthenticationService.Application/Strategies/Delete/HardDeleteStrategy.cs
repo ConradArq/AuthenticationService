@@ -1,4 +1,5 @@
-﻿using AuthenticationService.Application.Interfaces.Strategies;
+﻿using AuthenticationService.Application.Interfaces.Strategies.Delete;
+using AuthenticationService.Application.Strategies.Delete.Enums;
 using AuthenticationService.Domain.Interfaces.Models;
 using AuthenticationService.Domain.Interfaces.Repositories;
 
@@ -10,9 +11,7 @@ namespace AuthenticationService.Application.Strategies
     /// <typeparam name="T">The type of the entity to delete.</typeparam>
     public class HardDeleteStrategy<T> : IDeletionStrategy<T> where T : class, IBaseDomainModel
     {
-        public static readonly HardDeleteStrategy<T> Instance = new();
-
-        private HardDeleteStrategy() { }
+        public DeletionMode DeletionMode => DeletionMode.Hard;
 
         public void Delete(T entity, IUnitOfWork unitOfWork)
         {

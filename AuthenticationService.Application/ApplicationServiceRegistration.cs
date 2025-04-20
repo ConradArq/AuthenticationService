@@ -8,6 +8,11 @@ using AuthenticationService.Application.Interfaces.Services;
 using AuthenticationService.Application.Mappings;
 using AuthenticationService.Application.Services;
 using System.Reflection;
+using AuthenticationService.Application.Strategies.Delete;
+using AuthenticationService.Application.Strategies;
+using AuthenticationService.Application.Interfaces.Strategies.Delete;
+using AuthenticationService.Application.Interfaces.Strategies.Delete.Factories;
+using AuthenticationService.Application.Strategies.Delete.Factories;
 
 namespace AuthenticationService.Application
 {
@@ -38,6 +43,10 @@ namespace AuthenticationService.Application
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
             QueryProfile.InitializeMappings();
+
+            services.AddSingleton(typeof(IDeletionStrategy<>), typeof(HardDeleteStrategy<>));
+            services.AddSingleton(typeof(IDeletionStrategy<>), typeof(SoftDeleteStrategy<>));
+            services.AddSingleton<IDeleteStrategyFactory, DeleteStrategyFactory>();
 
             return services;
         }

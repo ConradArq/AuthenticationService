@@ -1,8 +1,9 @@
 ﻿using AuthenticationService.Application.Interfaces.Strategies;
+using AuthenticationService.Application.Interfaces.Strategies.Delete;
 using AuthenticationService.Domain.Interfaces.Models;
 using AuthenticationService.Domain.Interfaces.Repositories;
 
-namespace AuthenticationService.Application.Strategies
+namespace AuthenticationService.Application.Strategies.Synchronization
 {
     /// <summary>
     /// Provides a default implementation for synchronizing a collection of related entities 

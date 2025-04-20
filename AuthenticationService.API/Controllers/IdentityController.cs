@@ -16,7 +16,8 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace AuthenticationService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ProducesResponseType(typeof(ApiResponseDto<ApplicationUserResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ApiResponseDto<object>), StatusCodes.Status401Unauthorized)]

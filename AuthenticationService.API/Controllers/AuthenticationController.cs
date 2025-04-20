@@ -19,7 +19,8 @@ using AuthenticationService.Application.Features.Authentication.Commands.LoginVe
 namespace AuthenticationService.API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]  
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthenticationController : Controller
     {
         private readonly IMediator _mediator;
