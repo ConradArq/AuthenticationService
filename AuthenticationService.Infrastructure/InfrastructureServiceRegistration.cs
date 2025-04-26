@@ -19,6 +19,8 @@ using AuthenticationService.Infrastructure.Services.UserEmails;
 using AuthenticationService.Shared.Interfaces.Providers;
 using AuthenticationService.Shared.Interfaces.Factories;
 using Microsoft.Extensions.Hosting;
+using StackExchange.Redis;
+using AuthenticationService.Infrastructure.PollyPolicies;
 
 namespace AuthenticationService.Infrastructure
 {
@@ -49,6 +51,10 @@ namespace AuthenticationService.Infrastructure
                 options.Configuration = $"{redisHost}:{redisPort}";
                 options.InstanceName = redisConfig["InstanceName"];
             });
+
+            services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect($"{redisHost}:{redisPort}"));
+
+            services.AddSingleton<IPollyPolicyRegistry, PollyPolicyRegistry>();
 
             services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));

@@ -48,7 +48,6 @@ namespace AuthenticationService.Infrastructure.Services.BackgroundServices
 
             _semaphore = new SemaphoreSlim(5);
         }
-
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -57,24 +56,26 @@ namespace AuthenticationService.Infrastructure.Services.BackgroundServices
 
                 if (logEntry != null)
                 {
-                    // Start processing log entry with bounded parallelism
-                    _ = Task.Run(async () =>
-                    {
-                        await _semaphore.WaitAsync(stoppingToken);
-                        try
-                        {
-                            await ProcessLogEntryWithRetryAsync(logEntry, stoppingToken);
-                        }
-                        catch(Exception ex)
-                        {
-                            _logger.LogError(ex, "Error in logging background service.");
-                        }
-                        finally
-                        {
-                            _semaphore.Release();
-                        }
-                    }, stoppingToken);
+                    _ = ProcessLogInParallelAsync(logEntry, stoppingToken);
                 }
+            }
+        }
+
+        // Start processing log entry with bounded parallelism
+        private async Task ProcessLogInParallelAsync(object logEntry, CancellationToken stoppingToken)
+        {
+            await _semaphore.WaitAsync(stoppingToken);
+            try
+            {
+                await ProcessLogEntryWithRetryAsync(logEntry, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in logging background service.");
+            }
+            finally
+            {
+                _semaphore.Release();
             }
         }
 
@@ -96,7 +97,7 @@ namespace AuthenticationService.Infrastructure.Services.BackgroundServices
 
             int retryCount = 0;
             bool success = false;
-            var authorizationToken = _jwtTokenProvider.GenerateAuthenticationTokenAsync();
+            var authorizationToken = await _jwtTokenProvider.GenerateAuthenticationTokenAsync();
 
             while (!success && retryCount <= _maxRetryAttempts && !stoppingToken.IsCancellationRequested)
             {

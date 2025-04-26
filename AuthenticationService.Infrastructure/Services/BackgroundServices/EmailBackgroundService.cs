@@ -3,7 +3,6 @@ using Microsoft.Extensions.Hosting;
 using AuthenticationService.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using AuthenticationService.Shared.Resources;
-using AuthenticationService.Domain.Models;
 
 namespace AuthenticationService.Infrastructure.Services.BackgroundServices
 {
@@ -22,26 +21,28 @@ namespace AuthenticationService.Infrastructure.Services.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                using (var scope = _serviceScopeFactory.CreateScope())
-                {
-                    var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
-                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<EmailBackgroundService>>();
+                using var scope = _serviceScopeFactory.CreateScope();
+                var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+                var logger = scope.ServiceProvider.GetRequiredService<ILogger<EmailBackgroundService>>();
 
-                    if (_emailQueueService.TryDequeue(out var buildEmailFuncAsync))
-                    {
-                        try
-                        {
-                            Email email = await buildEmailFuncAsync();
-                            await emailService.SendEmailAsync(email);
-                            logger.LogInformation(string.Format(GeneralMessages.EmailSentMessage, email.Subject, email.To, email.CC == null ? GeneralMessages.NoneAvailableMessage.TrimEnd('.') : string.Join(", ", email.CC), email.BCC == null ? GeneralMessages.NoneAvailableMessage.TrimEnd('.') : string.Join(", ", email.BCC)));
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex, "Error in email background service.");
-                        }
-                    }
+                try
+                {
+                    var buildEmailFuncAsync = await _emailQueueService.DequeueEmailAsync(stoppingToken);
+                    var email = await buildEmailFuncAsync();
+                    await emailService.SendEmailAsync(email);
+
+                    logger.LogInformation(string.Format(
+                        GeneralMessages.EmailSentMessage,
+                        email.Subject,
+                        email.To,
+                        email.CC == null ? GeneralMessages.NoneAvailableMessage.TrimEnd('.') : string.Join(", ", email.CC),
+                        email.BCC == null ? GeneralMessages.NoneAvailableMessage.TrimEnd('.') : string.Join(", ", email.BCC)
+                    ));
                 }
-                await Task.Delay(1000, stoppingToken);
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error in email background service.");
+                }
             }
         }
     }
