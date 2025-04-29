@@ -13,5 +13,6 @@ namespace AuthenticationService.Infrastructure.PollyPolicies
         AsyncRetryPolicy RedisRetryPolicy { get; }
         AsyncRetryPolicy SqlRetryPolicy { get; }
         IAsyncPolicy<HttpResponseMessage> HttpRetryPolicy { get; }
+        IAsyncPolicy EmailPolicy { get; }
     }
 }

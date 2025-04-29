@@ -1,4 +1,5 @@
-﻿using Polly;
+﻿using Microsoft.Extensions.Logging;
+using Polly;
 using Polly.Retry;
 using StackExchange.Redis;
 
@@ -6,7 +7,7 @@ namespace AuthenticationService.Infrastructure.PollyPolicies
 {
     public static class RedisPolicies
     {
-        public static AsyncRetryPolicy GetRedisRetryPolicy()
+        public static AsyncRetryPolicy GetRedisRetryPolicy(ILogger<PollyPolicyRegistry> logger)
         {
             return Policy
                 .Handle<RedisConnectionException>()
@@ -16,8 +17,7 @@ namespace AuthenticationService.Infrastructure.PollyPolicies
                     sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200 * attempt),
                     onRetry: (exception, timeSpan, retryCount, context) =>
                     {
-                        // TODO: Implement custom logging
-                        Console.WriteLine($"[Redis] Retry {retryCount} after {timeSpan.TotalMilliseconds}ms due to {exception.GetType().Name}");
+                        logger.LogError($"[Redis] Retry {retryCount} after {timeSpan.TotalMilliseconds}ms due to {exception.GetType().Name}");
                     });
         }
     }

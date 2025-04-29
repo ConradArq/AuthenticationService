@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using AuthenticationService.Infrastructure.Interfaces.Services;
 using Microsoft.Extensions.Logging;
 using AuthenticationService.Shared.Resources;
+using AuthenticationService.Infrastructure.PollyPolicies;
 
 namespace AuthenticationService.Infrastructure.Services.BackgroundServices
 {
@@ -24,12 +25,17 @@ namespace AuthenticationService.Infrastructure.Services.BackgroundServices
                 using var scope = _serviceScopeFactory.CreateScope();
                 var emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
                 var logger = scope.ServiceProvider.GetRequiredService<ILogger<EmailBackgroundService>>();
+                var emailPolicy = scope.ServiceProvider.GetRequiredService<IPollyPolicyRegistry>().EmailPolicy;
 
                 try
                 {
                     var buildEmailFuncAsync = await _emailQueueService.DequeueEmailAsync(stoppingToken);
                     var email = await buildEmailFuncAsync();
-                    await emailService.SendEmailAsync(email);
+
+                    await emailPolicy.ExecuteAsync(async () =>
+                    {
+                        await emailService.SendEmailAsync(email);
+                    });
 
                     logger.LogInformation(string.Format(
                         GeneralMessages.EmailSentMessage,
