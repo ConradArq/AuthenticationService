@@ -66,23 +66,15 @@ namespace AuthenticationService.Application
             services.AddCors(options =>
             {
                 // Browsers block AllowAnyOrigin() when credentials like Authorization headers are sent, so origins in the CORS policy are used instead.
+                var origins = configuration.GetSection("Cors:ClientAppOrigins").Get<string[]>()
+                    ?? throw new InvalidOperationException("CORS origin is not configured. Please set 'Cors:ClientAppOrigin' in configuration.");
                 options.AddPolicy("ClientApp", builder =>
                 {
-
-#if DEBUG
-                    builder.WithOrigins("http://localhost:5170")
+                    builder.WithOrigins(origins)
                            .AllowCredentials()
                            .AllowAnyHeader()
                            .AllowAnyMethod();
-#else
-        builder.WithOrigins("https://client-app-url.com")
-               .AllowCredentials()
-               .AllowAnyHeader()
-               .AllowAnyMethod();
-#endif
-
                 });
-
             });
 
             services.AddHttpContextAccessor();
